@@ -64,7 +64,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={plusJakartaSans.variable}>
+    // onpoint.css sets `scroll-behavior: smooth` on <html>; this tells Next
+    // to jump (not glide) to the top when changing pages, like a full load.
+    <html lang="en" className={plusJakartaSans.variable} data-scroll-behavior="smooth">
       <head>
         {STYLESHEETS.map((href) => (
           <link key={href} rel="stylesheet" href={href} />

@@ -1,9 +1,16 @@
-// The inline <style> block of resources/views/pages/error404.blade.php, copied unchanged.
-// Rendered with <PageStyle> so it only applies while this page is shown.
+// The inline <style> block of resources/views/pages/error404.blade.php.
+// That view had no layout, so its rules targeted body, h1 and p directly;
+// the page now renders inside the site layout, so every rule is scoped to
+// the .error-404 wrapper (which takes over body's background), the wrapper
+// contains the floated button, and h1/p inherit colour, font and
+// line-height from it as they did from body (the template's own h1 rule
+// would otherwise win). Otherwise unchanged.
 const css = String.raw`
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,100,300,500);
 
-body { 
+.error-404 {
+  display: flow-root; /* contain the floated .button */
+  padding-bottom: 4em;
   background-color: #007aff; 
   color: #fff;
   font-size: 100%;
@@ -11,7 +18,7 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-.button {
+.error-404 .button {
   font-weight: 300;
   color: #fff;
   font-size: 1.2em;
@@ -26,18 +33,24 @@ body {
   transition: all .3s linear;
 }
 
-.button:hover {
+.error-404 .button:hover {
   background-color: #007aff;
   color: #fff;
 }
 
-p {
+.error-404 p {
+  color: inherit;
+  font-family: inherit;
+  line-height: inherit;
   font-size: 2em;
   text-align: center;
   font-weight: 100;
 }
 
-h1 {
+.error-404 h1 {
+  color: inherit;
+  font-family: inherit;
+  line-height: inherit;
   text-align: center;
   font-size: 15em;
   font-weight: 100;

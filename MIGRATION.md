@@ -5,10 +5,17 @@ Sumber referensi: `/mnt/data_project/lv-khayou-fe` (jangan diubah).
 | Langkah | Status |
 | --- | --- |
 | 1. Layout (head, menu, footer) | selesai |
-| 2. Inventaris plugin jQuery | selesai; pengganti per halaman dikerjakan di langkah 4 |
-| 3. Data produk → `src/data/products.ts` | belum |
-| 4. Halaman: home → `/shop/[slug]` → about → contact → 404 | belum |
-| 5. Form kontak & newsletter | belum diputuskan |
+| 2. Inventaris plugin jQuery | selesai |
+| 3. Data produk → `src/data/products.ts` | selesai |
+| 4. Halaman: home → `/shop/[slug]` → about → contact → 404 | selesai |
+| 5. Form kontak | selesai: kedua form mengirim lewat WhatsApp (form newsletter themehealer.com tidak dipakai di halaman mana pun) |
+
+## Masih perlu dari pemilik situs
+
+- **Foto founder**: simpan di `public/images/team/founder-khayou.jpg`. Halaman About memakainya otomatis pada build berikutnya; selama belum ada, yang tampil emblem Khayou. File ini juga tidak ada di Laravel, sehingga dulu gambarnya rusak.
+- **Link Tokopedia Ledgy dan Slyde**: tombol Buy Now di semua halaman detail membuka listing Minima (sama seperti di Laravel). Isi `tokopediaUrl` per produk di `src/data/products.ts`.
+- **Isi halaman Contact**: jam buka, peta showroom, dan FAQ disembunyikan karena masih teks template (showroom di San Francisco, "30-day return", "ship to 25 countries", garansi 2 tahun). Teks aslinya ada di `resources/views/pages/contact/index.blade.php` di repo Laravel.
+- **Vercel Pro** sebelum dipakai untuk toko di domain asli; paket Hobby hanya untuk non-komersial.
 
 ## Langkah 1: layout
 
@@ -65,17 +72,55 @@ Perilaku `onpoint.js` yang dipakai di semua halaman:
 | Class `current` di menu (`dynamicCurrentMenuClass`) | `usePathname()` di `MainMenu.tsx` |
 | Preloader `fadeOut` | dihapus |
 
-Skrip inline per halaman ditulis dengan vanilla JS, dan akan di-port ke React di langkah 4:
+Skrip inline per halaman ditulis dengan vanilla JS, dan sudah di-port ke React di langkah 4:
 
 - `landingpage/testimonial`: slider 6 slide (otomatis 5 s, swipe, tombol, dots, panah keyboard).
-- `landingpage/video`: video dimuat saat mendekati viewport, overlay disejajarkan dengan video, teks berganti tiap 3,5 s. `public/videos/khayou-v3.mp4` (14,5 MB) belum disalin dari Laravel.
+- `landingpage/video`: video dimuat saat mendekati viewport, overlay disejajarkan dengan video, teks berganti tiap 3,5 s.
 - `shop/detail`: overlay zoom gambar produk, bisa ditutup dengan Escape.
 - `about`: scroll halus ke `#contact` dengan offset tinggi header; form dikirim ke WhatsApp.
 - `contact`: form palsu (`Math.random`) dan warna border berubah saat blur.
 
-Catatan untuk langkah 4:
+Catatan teknis yang dipakai di langkah 4:
 
 - Jangan memakai class `owl-carousel` di markup baru. CSS Owl yang lama menyembunyikannya sampai di-init. Di sisi lain, `card.css` men-style `.owl-nav`, `.owl-dots`, dan `.owl-dot.active`, jadi pakai nama class itu untuk tombol dan dots Swiper agar tampilannya sama.
 - Mode loop Swiper butuh jumlah slide lebih banyak dari `slidesPerView`. Ada 4 produk dan 4 tampil sekaligus di ≥1200 px, jadi gandakan daftar slidenya.
 - Swiper modern memakai class `.swiper`, bukan `.swiper-container`. Selector `.main-slider .swiper-slide*` dan `#main-slider-pagination .swiper-pagination-bullet*` di `onpoint.css` tetap cocok.
 - Markup Blade menyalin class `animated` dan inline `style="visibility…; animation-name…"` hasil render WOW. Hapus keduanya, cukup `wow <animasi>` dan `data-wow-*`.
+
+## Langkah 3–5: data dan halaman
+
+| Blade | Next.js |
+| --- | --- |
+| `MainController.php` + blok per-slug di `header.blade.php` (SEO) dan `shop/detail.blade.php` (spesifikasi) | `src/data/products.ts` |
+| `landingpage/*` | `src/app/page.tsx`, `src/components/home/*` |
+| `shop/index` (bundle) dan `shop/detail` | `src/app/shop/[slug]/page.tsx`, `src/components/shop/*` |
+| `about/index` | `src/app/about/page.tsx`, `src/components/about/*` |
+| `contact/index` | `src/app/contact/page.tsx`, `src/components/contact/ContactForm.tsx` |
+| `error404` | `src/app/not-found.tsx` |
+
+**CSS per halaman.** Blok `<style>` inline di Blade disalin apa adanya ke `src/styles/pages/*.ts` (sebagai string), lalu dirender lewat `<PageStyle>`. Cara ini mempertahankan urutan CSS seperti di Laravel (setelah CSS template), dan CSS-nya hilang saat pindah halaman sehingga tidak bocor ke halaman lain. Satu-satunya yang diubah adalah CSS 404, yang dibatasi ke `.error-404` karena aslinya menarget `body`.
+
+**Yang berbeda dari Laravel:**
+
+- **Data produk.** Spesifikasi diambil dari teks yang benar-benar tampil di view; array `details` di controller tidak pernah ditampilkan.
+- **Home.**
+  - Carousel memakai Swiper dengan perilaku Owl: di ≥1200 px empat produk tampil tanpa panah/titik tetapi tetap berputar, dan titik dihitung per halaman.
+  - Saat halaman dibuka, testimoni dulu menampilkan tiga slide sekaligus selama 5 detik; sekarang satu slide.
+  - Tombol "Quick add" menjadi link.
+- **Shop.**
+  - Slug yang tidak dikenal sekarang benar-benar 404 (Laravel mengembalikan status 200).
+  - Nama produk menjadi `<h1>` (dulu `<h5>`, dengan h1/h2 tersembunyi di `<head>`).
+  - Link bersarang (`<a>` di dalam `<a>`) di "You may also like" diperbaiki.
+  - Tombol "Shop Now" di banner bundle sekarang benar-benar ke daftar produk (`#products` dulu tidak ada).
+  - `og:url` halaman bundle mengarah ke halamannya sendiri (dulu ke home).
+  - Judul SEO "Legdy" menjadi "Ledgy"; slug tetap `legdy-deskshelf`.
+  - Di daftar saran, "Khayou Bundling Set" menjadi "Khayou Set Bundle".
+- **About.**
+  - Pesan error form tampil di bawah field seperti jquery-validate, dan WhatsApp hanya dibuka kalau isian valid.
+  - Dulu form ini juga mengirim POST ke `/about` yang selalu gagal.
+  - h1 tersembunyi memakai `visually-hidden`.
+- **Contact.**
+  - Form palsu (`Math.random`) sekarang mengirim lewat WhatsApp.
+  - Kontak placeholder diganti data Khayou yang asli (email, WhatsApp, workshop Bandung, Tokopedia, Instagram, YouTube).
+  - `<select>` memakai `form-select` Bootstrap, bukan nice-select.
+- **Navigasi.** `data-scroll-behavior="smooth"` di `<html>` membuat perpindahan halaman langsung mulai dari atas, sementara smooth scroll di dalam halaman tetap jalan.
