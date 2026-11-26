@@ -1,0 +1,152 @@
+/*
+ * Styles that the Laravel layouts kept inline, plus overrides the Next.js
+ * port needs. Linked last (see STYLESHEETS in src/app/layout.tsx), the way the
+ * inline <style> blocks came after the template CSS.
+ */
+
+/* Plus Jakarta Sans is self-hosted by next/font under a generated family
+   name, exposed as --font-plus-jakarta on <html>. */
+:root {
+  --onpoint-font: var(--font-plus-jakarta), sans-serif;
+  --onpoint-font-two: var(--font-plus-jakarta), sans-serif;
+}
+
+/* Scroll-to-top: the template hides it (display: none) and onpoint.js used
+   jQuery fadeIn; ScrollToTop toggles this class instead. */
+.scroll-to-top.is-visible {
+  display: inline-block;
+  animation: fadeIn 0.5s;
+}
+
+/* ---- layouts/menu.blade.php ---- */
+
+/* Hide the menu list on small screens (mobile) */
+@media (max-width: 768px) {
+  .main-menu__list {
+    display: none !important;
+  }
+
+  /* keep the logo from shifting */
+  .main-menu__logo {
+    margin-left: 0 !important;
+  }
+}
+
+/* Shop dropdown, ~3x wider on desktop: featured item on top, links below */
+.menu-dropdown { position: relative; }
+.menu-dropdown > a {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: #0b0b0b;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background .15s, color .15s;
+}
+.menu-dropdown > a:hover { background: rgba(0,0,0,0.04); }
+
+.menu-dropdown .submenu {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(13,18,30,0.08);
+  padding: 14px;
+  min-width: 780px; /* ~3x the original 260px */
+  z-index: 9999;
+}
+.menu-dropdown .submenu li { list-style: none; }
+.menu-dropdown:hover .submenu { display: block; }
+
+.submenu-vertical a{border:none; display:block; padding:8px 10px; border-radius:6px; text-decoration:none; color:inherit;font-weight:400}
+
+/* Grid: full-width featured item, three columns below */
+.submenu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.submenu-grid .grid-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+.featured {
+  display: block;
+  padding: 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  background: #fbfbfd;
+}
+.featured-inner { display: flex; gap: 12px; align-items: center; justify-content: center}
+.featured-inner img { width: 220px; height: 140px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.featured-inner .featured-text { font-weight: 700; font-weight: bold; color: #000}
+.featured-text { font-weight: 700; font-weight: bold; color: #000}
+.featured-inner .featured-text strong{ font-weight: 700; font-weight: bold; color: #000}
+.featured-inner .featured-text p { margin: 6px 0 0; font-weight: 500; color: #444; font-size: 0.94rem; }
+
+.item-card {
+  display: block;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.item-card .thumb { width: 100%; height: 160px; object-fit: cover; display: block; }
+.item-card .meta { padding: 10px; font-weight: 600; font-size: .95rem; }
+
+.menu-dropdown .submenu a:hover .item-card,
+.menu-dropdown .submenu a:hover .featured { box-shadow: 0 6px 20px rgba(13,18,30,0.06); transform: translateY(-2px); transition: transform .12s, box-shadow .12s; }
+
+/* Stack on mobile */
+@media (max-width: 768px) {
+  .menu-dropdown .submenu {
+    position: static;
+    box-shadow: none;
+    border-radius: 6px;
+    margin-top: 6px;
+    min-width: auto;
+    width: calc(100vw - 40px);
+  }
+  .submenu-grid .grid-items { grid-template-columns: 1fr; }
+  .featured-inner img { width: 120px; height: 80px; }
+}
+
+/* Underline that grows left to right and matches the text width */
+.submenu-vertical a {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  display: inline-block; /* size to content so the underline follows the text */
+  padding: 8px 10px;
+}
+.submenu-vertical a::after {
+  content: "";
+  position: absolute;
+  left: 10px; /* respect horizontal padding */
+  bottom: 8px;
+  height: 2px;
+  width: calc(50% - 10px); /* default underline */
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .22s cubic-bezier(.2,.9,.2,1);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* nth-of-type counts only the <a> elements */
+.submenu-vertical a:nth-of-type(1)::after {
+  width: calc(50% - 10px);
+}
+.submenu-vertical a:nth-of-type(2)::after {
+  width: calc(50% - 58px);
+}
+.submenu-vertical a:nth-of-type(3)::after {
+  width: calc(50% - 50px);
+}
+.submenu-vertical a:nth-of-type(4)::after {
+  width: calc(50% - 60px);
+}
+.submenu-vertical a:hover::after,
+.submenu-vertical a.current::after {
+  transform: scaleX(1);
+}
