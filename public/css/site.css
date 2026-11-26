@@ -183,3 +183,10 @@
 a.quick-add-btn,
 a.quick-add-btn:hover,
 a.quick-add-btn:focus { display: inline-block; color: white; text-decoration: none; }
+
+/* Bundle page "Buy Now" was a <button> opening Tokopedia; as a link it
+   needs a button's inline-block box (so its margin applies) and centred,
+   undecorated text to look the same. */
+a.landscape-add-to-cart,
+a.landscape-add-to-cart:hover,
+a.landscape-add-to-cart:focus { display: inline-block; color: white; text-align: center; text-decoration: none; }
